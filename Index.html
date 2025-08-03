@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kaito Yaps Rank Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      padding: 3rem;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      max-width: 550px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    h1 {
+      color: #1e3c72;
+      margin-bottom: 0.5rem;
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 2.5rem;
+      font-size: 1.2rem;
+      line-height: 1.4;
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 2.5rem;
+    }
+    
+    input {
+      width: 100%;
+      padding: 1.2rem 1.5rem;
+      font-size: 1.2rem;
+      border: 2px solid #e1e8ed;
+      border-radius: 16px;
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+    
+    input:focus {
+      border-color: #2a5298;
+      box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.1);
+      transform: translateY(-3px);
+      background: white;
+    }
+    
+    input::placeholder {
+      color: #999;
+    }
+    
+    .check-btn {
+      width: 100%;
+      padding: 1.2rem 2rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .check-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .check-btn:hover::before {
+      left: 100%;
+    }
+    
+    .check-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(30, 60, 114, 0.4);
+    }
+    
+    .check-btn:active {
+      transform: translateY(-1px);
+    }
+    
+    .check-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .result-container {
+      margin-top: 2.5rem;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .result {
+      padding: 2rem;
+      border-radius: 16px;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      max-width: 100%;
+      word-wrap: break-word;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .result.success {
+      background: linear-gradient(135deg, #00c851 0%, #007e33 100%);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 200, 81, 0.3);
+    }
+    
+    .result.error {
+      background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(255, 68, 68, 0.3);
+    }
+    
+    .result.loading {
+      background: rgba(42, 82, 152, 0.1);
+      color: #2a5298;
+      font-weight: 600;
+      border: 2px solid rgba(42, 82, 152, 0.2);
+    }
+    
+    .result.info {
+      background: linear-gradient(135deg, #33b5e5 0%, #0099cc 100%);
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(51, 181, 229, 0.3);
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid #2a5298;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.8rem;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .rank-display {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      align-items: center;
+    }
+    
+    .rank-number {
+      font-size: 3rem;
+      font-weight: 800;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .yaps-score {
+      font-size: 1.4rem;
+      opacity: 0.95;
+      font-weight: 600;
+    }
+    
+    .user-info {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-top: 0.5rem;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .stat-item {
+      background: rgba(255,255,255,0.2);
+      padding: 0.8rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+    
+    .demo-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(42, 82, 152, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(42, 82, 152, 0.1);
+    }
+    
+    .demo-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2a5298;
+      margin-bottom: 1rem;
+    }
+    
+    .demo-buttons {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .demo-btn {
+      padding: 0.6rem 1.2rem;
+      background: rgba(42, 82, 152, 0.1);
+      color: #2a5298;
+      border: 1px solid rgba(42, 82, 152, 0.2);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .demo-btn:hover {
+      background: rgba(42, 82, 152, 0.2);
+      transform: translateY(-1px);
+    }
+    
+    .api-info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: rgba(255, 193, 7, 0.1);
+      border-radius: 12px;
+      border-left: 4px solid #ffc107;
+      font-size: 0.9rem;
+      color: #856404;
+      text-align: left;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 2rem;
+        margin: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      input, .check-btn {
+        font-size: 1.1rem;
+      }
+      
+      .rank-number {
+        font-size: 2.5rem;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .demo-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🌊</div>
+    <h1>Kaito Yaps Checker</h1>
+    <p class="subtitle">Check your Yaps score and ranking in the crypto attention economy</p>
+    
+    <div class="input-group">
+      <input type="text" id="xHandle" placeholder="Enter X handle (e.g., vitalikbuterin)" autocomplete="off">
+    </div>
+    
+    <button class="check-btn" onclick="checkRank()">
+      <span id="button-text">Check My Yaps</span>
+    </button>
+    
+    <div class="result-container">
+      <div id="result"></div>
+    </div>
+    
+    <div class="demo-section">
+      <div class="demo-title">Try these popular accounts:</div>
+      <div class="demo-buttons">
+        <span class="demo-btn" onclick="tryDemo('vitalikbuterin')">vitalikbuterin</span>
+        <span class="demo-btn" onclick="tryDemo('elonmusk')">elonmusk</span>
+        <span class="demo-btn" onclick="tryDemo('cz_binance')">cz_binance</span>
+        <span class="demo-btn" onclick="tryDemo('kaitoai')">kaitoai</span>
+      </div>
+    </div>
+    
+    <div class="api-info">
+      <strong>ℹ️ Note:</strong> This tool uses Kaito's public API to fetch Yaps scores. The default rate limit is 100 calls every 5 minutes. Yaps represent tokenized attention in the crypto space and are updated regularly.
+    </div>
+  </div>
+
+  <script>
+    let isChecking = false;
+    const API_BASE = 'https://api.kaito.ai/v1/yaps';
+
+    async function checkRank() {
+      if (isChecking) return;
+      
+      const handleInput = document.getElementById('xHandle');
+      const handle = handleInput.value.trim().replace('@', '').toLowerCase();
+      const resultBox = document.getElementById('result');
+      const button = document.querySelector('.check-btn');
+      const buttonText = document.getElementById('button-text');
+      
+      if (!handle) {
+        showResult('Please enter an X handle to check', 'error');
+        return;
+      }
+      
+      if (handle.length < 2 || handle.length > 50) {
+        showResult('Please enter a valid X handle (2-50 characters)', 'error');
+        return;
+      }
+      
+      isChecking = true;
+      button.disabled = true;
+      buttonText.textContent = 'Checking...';
+      
+      showResult('<span class="spinner"></span>Fetching Yaps data from Kaito API...', 'loading');
+
+      try {
+        // Primary API call - try with username
+        let response = await fetchWithTimeout(`${API_BASE}?username=${encodeURIComponent(handle)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        }, 10000);
+        
+        if (!response.ok) {
+          // Try alternative endpoints or mock data for demo
+          if (response.status === 404) {
+            throw new Error('PROFILE_NOT_FOUND');
+          } else if (response.status === 429) {
+            throw new Error('RATE_LIMITED');
+          } else if (response.status >= 500) {
+            throw new Error('SERVER_ERROR');
+          } else {
+            throw new Error('API_ERROR');
+          }
+        }
+        
+        const data = await response.json();
+        displayYapsData(data, handle);
+        
+      } catch (err) {
+        console.error('Error checking Yaps:', err.message);
+        handleApiError(err, handle);
+      } finally {
+        isChecking = false;
+        button.disabled = false;
+        buttonText.textContent = 'Check My Yaps';
+      }
+    }
+    
+    async function fetchWithTimeout(url, options, timeout) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        return response;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    }
+    
+    function displayYapsData(data, handle) {
+      const yapsScore = data.yaps_score || data.score || 0;
+      const rank = data.rank || data.leaderboard_position;
+      const lastUpdated = data.last_updated || data.updated_at;
+      
+      let resultHTML = `
+        <div class="rank-display">
+          <div class="user-info">@${handle}</div>
+          <div class="yaps-score">${formatNumber(yapsScore)} Yaps</div>
+      `;
+      
+      if (rank && rank <= 10000) {
+        resultHTML += `<div class="rank-number">#${formatNumber(rank)}</div>`;
+      } else {
+        resultHTML += `<div style="font-size: 1.5rem; color: rgba(255,255,255,0.8);">Not in Top 10K</div>`;
+      }
+      
+      if (data.mindshare_percentage) {
+        resultHTML += `
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div>Mindshare</div>
+              <div>${data.mindshare_percentage}%</div>
+            </div>
+        `;
+      }
+      
+      if (lastUpdated) {
+        resultHTML += `
+            <div class="stat-item">
+              <div>Last Updated</div>
+              <div>${formatDate(lastUpdated)}</div>
+            </div>
+          </div>
+        `;
+      }
+      
+      resultHTML += `</div>`;
+      showResult(resultHTML, 'success');
+    }
+    
+    function handleApiError(err, handle) {
+      let errorMessage = '';
+      let errorType = 'error';
+      
+      switch (err.message) {
+        case 'PROFILE_NOT_FOUND':
+          errorMessage = `The account "@${handle}" was not found in Kaito's database. This might mean the account doesn't exist, is private, or hasn't been indexed yet.`;
+          break;
+        case 'RATE_LIMITED':
+          errorMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+          break;
+        case 'SERVER_ERROR':
+          errorMessage = 'Kaito API is temporarily unavailable. Please try again later.';
+          break;
+        default:
+          // For demo purposes, show mock data for some accounts
+          if (isDemoAccount(handle)) {
+            showDemoData(handle);
+            return;
+          }
+          errorMessage = `Unable to fetch data for "@${handle}". This could be due to API limitations, network issues, or the account not being indexed in Kaito's system.`;
+      }
+      
+      showResult(errorMessage, errorType);
+    }
+    
+    function isDemoAccount(handle) {
+      const demoAccounts = ['vitalikbuterin', 'elonmusk', 'cz_binance', 'kaitoai', 'a16z', 'balajis'];
+      return demoAccounts.includes(handle.toLowerCase());
+    }
+    
+    function showDemoData(handle) {
+      const demoData = {
+        'vitalikbuterin': { yaps: 125420, rank: 3, mindshare: 8.2 },
+        'elonmusk': { yaps: 89350, rank: 7, mindshare: 6.1 },
+        'cz_binance': { yaps: 98230, rank: 5, mindshare: 7.3 },
+        'kaitoai': { yaps: 45670, rank: 28, mindshare: 3.8 },
+        'a16z': { yaps: 67890, rank: 12, mindshare: 4.9 },
+        'balajis': { yaps: 78920, rank: 9, mindshare: 5.7 }
+      };
+      
+      const data = demoData[handle.toLowerCase()];
+      if (data) {
+        let resultHTML = `
+          <div class="rank-display">
+            <div class="user-info">@${handle} (Demo Data)</div>
+            <div class="yaps-score">${formatNumber(data.yaps)} Yaps</div>
+            <div class="rank-number">#${data.rank}</div>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div>Mindshare</div>
+                <div>${data.mindshare}%</div>
+              </div>
+              <div class="stat-item">
+                <div>Status</div>
+                <div>Demo Mode</div>
+              </div>
+            </div>
+          </div>
+        `;
+        showResult(resultHTML, 'info');
+      }
+    }
+    
+    function showResult(message, type = '') {
+      const resultBox = document.getElementById('result');
+      resultBox.innerHTML = message;
+      resultBox.className = `result ${type}`;
+    }
+    
+    function formatNumber(num) {
+      if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+      } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+      }
+      return num.toLocaleString();
+    }
+    
+    function formatDate(dateString) {
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString();
+      } catch {
+        return 'Unknown';
+      }
+    }
+    
+    function tryDemo(handle) {
+      document.getElementById('xHandle').value = handle;
+      checkRank();
+    }
+    
+    // Enhanced enter key support
+    document.getElementById('xHandle').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !isChecking) {
+        checkRank();
+      }
+    });
+    
+    // Real-time input validation
+    document.getElementById('xHandle').addEventListener('input', function(e) {
+      const value = e.target.value;
+      const cleanValue = value.replace(/[^a-zA-Z0-9_]/g, '');
+      if (value !== cleanValue) {
+        e.target.value = cleanValue;
+      }
+      
+      // Clear previous results when typing
+      if (!isChecking) {
+        const resultBox = document.getElementById('result');
+        if (resultBox.innerHTML) {
+          resultBox.innerHTML = '';
+          resultBox.className = 'result';
+        }
+      }
+    });
+    
+    // Auto-focus input on page load
+    window.addEventListener('load', () => {
+      document.getElementById('xHandle').focus();
+    });
+  </script>
+</body>
+</html>
